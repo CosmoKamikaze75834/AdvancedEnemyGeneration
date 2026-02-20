@@ -9,7 +9,7 @@ public class Spawner : MonoBehaviour
     [SerializeField] private Enemy _enemy;
     [SerializeField] private int _poolCapacity = 5;
     [SerializeField] private int _poolMaxSize = 5;
-    [SerializeField] private GameObject _startPoint;
+    [SerializeField] private StartPoint _startPoint;
     [SerializeField] private Target _target;
 
     private ObjectPool<Enemy> _pool;
@@ -21,8 +21,7 @@ public class Spawner : MonoBehaviour
     private void Awake() 
     {
     _pool = new ObjectPool<Enemy>(
-        createFunc: () => { Enemy enemy = Instantiate(_enemy);
-        return enemy;},
+        createFunc: () => Instantiate(_enemy),
         actionOnGet: (enemy) => PrepareObject(enemy),
         actionOnRelease: (enemy) => enemy.gameObject.SetActive(false),
         actionOnDestroy: (enemy) => Destroy(enemy.gameObject),
@@ -38,13 +37,7 @@ public class Spawner : MonoBehaviour
 
     private void PrepareObject(Enemy enemy)
     {
-        enemy.ResetPosition();
         enemy.gameObject.SetActive(true);
-    }
-
-    private void EstablishSpawnPoint(Enemy enemy)
-    {
-        enemy.transform.position = _startPoint.transform.position;
     }
 
     private void ReturnEnemyPool(Enemy enemy)
@@ -60,8 +53,7 @@ public class Spawner : MonoBehaviour
             if(_startPoint != null)
             {
                 Enemy enemy = _pool.Get();
-                EstablishSpawnPoint(enemy);
-                enemy.EstablishTarget(_target.transform);
+                enemy.Initialize(_target.transform, _startPoint.transform);
                 enemy.LifeTimeEnded += ReturnEnemyPool;
             }
 

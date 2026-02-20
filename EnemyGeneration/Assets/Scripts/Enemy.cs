@@ -2,20 +2,18 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private float _speed;
 
-    private Rigidbody _rigidbody;
     private Transform _target;
     private int _lifeTime = 5;
 
     public event Action<Enemy> LifeTimeEnded;
 
-    private void Awake()
+    private void OnEnable()
     {
-        _rigidbody = GetComponent<Rigidbody>();
+        StartCoroutine(WaitForLifeTimeEnd());
     }
 
     private void Update()
@@ -23,21 +21,10 @@ public class Enemy : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, _target.position, _speed * Time.deltaTime);
     }
 
-    private void OnEnable()
-    {
-        StartCoroutine(WaitForLifeTimeEnd());
-    }
-
-    public void ResetPosition()
-    {
-        _rigidbody.velocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
-        _rigidbody.rotation = Quaternion.identity;
-    }
-
-    public void EstablishTarget(Transform target)
+    public void Initialize(Transform target, Transform startPoint)
     {
         _target = target;
+        transform.position = startPoint.position;
     }
 
     private IEnumerator WaitForLifeTimeEnd()
